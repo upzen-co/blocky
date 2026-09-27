@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Blocky",
+  "version": "1.0.0",
+  "description": "Hides the X home feed until you choose to reveal it, and only for a few minutes at a time.",
+  "permissions": ["storage"],
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://x.com/*", "https://twitter.com/*"],
+      "js": ["content.js"],
+      "css": ["blocky.css"],
+      "run_at": "document_start"
+    }
+  ]
+}

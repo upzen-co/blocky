@@ -1,0 +1,78 @@
+/* While locked on the home page: hide the timeline and the sidebar's
+   trends / who-to-follow. The compose box and search stay usable. */
+html.blocky-locked [data-testid="primaryColumn"] section[role="region"],
+html.blocky-locked [data-testid="sidebarColumn"] section,
+html.blocky-locked [data-testid="sidebarColumn"] aside,
+/* The floating "↑ [avatars] posted" new-posts pill. */
+html.blocky-locked [data-testid="pillLabel"],
+html.blocky-locked [role="button"]:has([data-testid="pillLabel"]),
+html.blocky-locked [aria-label^="New posts are available"] {
+  display: none !important;
+}
+
+#blocky-panel {
+  margin: 32px 16px;
+  padding: 28px 24px;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 16px;
+  text-align: center;
+  color: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+#blocky-panel h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 800;
+}
+#blocky-panel p {
+  margin: 0 0 20px;
+  font-size: 15px;
+  opacity: 0.7;
+}
+#blocky-panel .blocky-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+#blocky-panel button,
+#blocky-pill button {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: #4cae50;
+}
+#blocky-panel button {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+#blocky-panel button:hover,
+#blocky-pill button:hover {
+  background: #43a047;
+}
+
+#blocky-pill {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 999px;
+  background: rgba(15, 20, 25, 0.9);
+  color: #fff;
+  font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+#blocky-pill button {
+  padding: 4px 12px;
+  font-size: 13px;
+}
