@@ -69,7 +69,11 @@
       ]);
       document.body.append(pill);
     }
-    if (pill) pill.querySelector(".blocky-time").textContent = `Feed visible · ${formatRemaining()}`;
+    if (!pill) return;
+    const label = pill.querySelector(".blocky-time");
+    const text = `Feed visible · ${formatRemaining()}`;
+    // Only write when it changes: every write is a DOM mutation.
+    if (label.textContent !== text) label.textContent = text;
   }
 
   function render() {
@@ -94,6 +98,23 @@
 
   function scheduleRender() {
     if (frame === null) frame = requestAnimationFrame(render);
+  }
+
+  // Mutations caused by Blocky's own panel/pill must not trigger another
+  // render, or render -> mutation -> render loops every frame.
+  const OWN = "#blocky-panel, #blocky-pill";
+  const isOwn = (node) =>
+    node.id === "blocky-panel" ||
+    node.id === "blocky-pill" ||
+    !!(node.nodeType === 1 ? node : node.parentElement)?.closest(OWN);
+
+  function onMutations(records) {
+    const external = records.some(
+      (r) =>
+        !isOwn(r.target) &&
+        ![...r.addedNodes, ...r.removedNodes].every(isOwn)
+    );
+    if (external) scheduleRender();
   }
 
   function armTimers() {
@@ -127,7 +148,7 @@
 
   // X is a single-page app: re-check on every DOM change (throttled to one
   // pass per frame) to catch client-side navigation and re-rendered timelines.
-  new MutationObserver(scheduleRender).observe(document.documentElement, {
+  new MutationObserver(onMutations).observe(document.documentElement, {
     childList: true,
     subtree: true,
   });
