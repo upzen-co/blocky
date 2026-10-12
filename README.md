@@ -35,7 +35,7 @@ Turn each one on or off from Blocky's toolbar button. Changes apply to open tabs
 
 ## Brave on iPhone and iPad
 
-Extensions don't run in Brave on iOS, so [`filters/brave-ios.txt`](filters/brave-ios.txt) has filter rules that do the same hiding (without the timed reveal). In Brave, go to **Settings → Shields & Privacy → Content Filtering** and either add the file's raw GitHub URL as a custom filter list (it stays up to date) or paste the rules into **Create Custom Filters**. They work on the sites opened in Brave, not in the X, YouTube, Reddit or Facebook apps.
+Extensions don't run in Brave on iOS, so [`filters/Blocky by Upzen`](filters/Blocky%20by%20Upzen) has filter rules that do the same hiding (without the timed reveal). In Brave, go to **Settings → Shields & Privacy → Content Filtering** and either add the file's raw GitHub URL as a custom filter list (it stays up to date) or paste the rules into **Create Custom Filters**. They work on the sites opened in Brave, not in the X, YouTube, Reddit or Facebook apps.
 
 ## Customise
 
