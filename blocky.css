@@ -1,12 +1,57 @@
-/* While locked on the home page: hide the timeline and the sidebar's
-   trends / who-to-follow. The compose box and search stay usable. */
-html.blocky-locked [data-testid="primaryColumn"] section[role="region"],
-html.blocky-locked [data-testid="sidebarColumn"] section,
-html.blocky-locked [data-testid="sidebarColumn"] aside,
+/* ---- Timed feed lock (html.blocky-locked is set only on a feed page) ---- */
+
+/* X: hide the timeline and the sidebar's trends / who-to-follow.
+   The compose box and search stay usable. */
+html.blocky-x.blocky-locked [data-testid="primaryColumn"] section[role="region"],
+html.blocky-x.blocky-locked [data-testid="sidebarColumn"] section,
+html.blocky-x.blocky-locked [data-testid="sidebarColumn"] aside,
 /* The floating "↑ [avatars] posted" new-posts pill. */
-html.blocky-locked [data-testid="pillLabel"],
-html.blocky-locked [role="button"]:has([data-testid="pillLabel"]),
-html.blocky-locked [aria-label^="New posts are available"] {
+html.blocky-x.blocky-locked [data-testid="pillLabel"],
+html.blocky-x.blocky-locked [role="button"]:has([data-testid="pillLabel"]),
+html.blocky-x.blocky-locked [aria-label^="New posts are available"],
+/* YouTube home grid (its topic chips live inside it). */
+html.blocky-youtube.blocky-locked ytd-browse[page-subtype="home"] ytd-rich-grid-renderer,
+html.blocky-youtube.blocky-locked ytm-browse ytm-rich-grid-renderer,
+/* Reddit home / popular / all (new and old Reddit). */
+html.blocky-reddit.blocky-locked shreddit-feed,
+html.blocky-reddit.blocky-locked #siteTable,
+/* Facebook News Feed. */
+html.blocky-facebook.blocky-locked [role="main"] [role="feed"] {
+  display: none !important;
+}
+
+/* ---- Always-on toggles ---- */
+
+/* X: freeze the swipe-through video viewer on the video you opened (content.js
+   also loops it, so it never auto-advances). */
+html.blocky-x.blocky-xNoAutoAdvance [data-testid="vss-scroll-view"],
+html.blocky-x.blocky-xNoAutoAdvance [data-testid="vss-scroll-view"] > div {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+/* X: Spaces and live broadcasts. */
+html.blocky-x.blocky-xLive [data-testid="cellInnerDiv"]:has(a[href*="/i/spaces/"], a[href*="/i/broadcasts/"]),
+html.blocky-x.blocky-xLive [data-testid="ScrollSnap-SwipeableList"]:has(button[aria-label*="is hosting"], button[aria-label^="Broadcast,"], button[aria-label^="Space,"]),
+html.blocky-x.blocky-xLive [data-testid="placementTracking"]:has(button[aria-label*="is hosting"], button[aria-label^="Broadcast,"], button[aria-label^="Space,"]),
+/* YouTube Shorts, desktop: shelves, Shorts in search/subscriptions, the
+   sidebar entries and the channel tab. */
+html.blocky-youtube.blocky-ytShorts ytd-reel-shelf-renderer,
+html.blocky-youtube.blocky-ytShorts ytd-rich-shelf-renderer[is-shorts],
+html.blocky-youtube.blocky-ytShorts ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts], a[href^="/shorts/"]),
+html.blocky-youtube.blocky-ytShorts grid-shelf-view-model:has(a[href^="/shorts/"]),
+html.blocky-youtube.blocky-ytShorts ytd-video-renderer:has(a[href^="/shorts/"]),
+html.blocky-youtube.blocky-ytShorts ytd-rich-item-renderer:has(a[href^="/shorts/"]),
+html.blocky-youtube.blocky-ytShorts ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+html.blocky-youtube.blocky-ytShorts ytd-guide-entry-renderer:has(a[href^="/shorts"], a[title="Shorts"]),
+html.blocky-youtube.blocky-ytShorts ytd-mini-guide-entry-renderer:has(a[href^="/shorts"]),
+html.blocky-youtube.blocky-ytShorts yt-tab-shape[tab-title="Shorts"],
+/* YouTube Shorts, mobile site (m.youtube.com). */
+html.blocky-youtube.blocky-ytShorts ytm-reel-shelf-renderer,
+html.blocky-youtube.blocky-ytShorts ytm-rich-section-renderer:has(ytm-shorts-lockup-view-model),
+html.blocky-youtube.blocky-ytShorts ytm-video-with-context-renderer:has(a[href^="/shorts/"]),
+html.blocky-youtube.blocky-ytShorts ytm-rich-item-renderer:has(a[href^="/shorts/"]),
+html.blocky-youtube.blocky-ytShorts ytm-pivot-bar-item-renderer:has(.pivot-shorts) {
   display: none !important;
 }
 

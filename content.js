@@ -1,22 +1,83 @@
-// Blocky: hide the X home feed until the user reveals it for a fixed number
-// of minutes. The unlock expiry lives in chrome.storage so every X tab shares it.
+// Blocky: hide feeds (X, YouTube, Reddit, Facebook) until the user reveals
+// them for a fixed number of minutes, and optionally hide Shorts / video /
+// live content outright. Each site's unlock expiry lives in chrome.storage so
+// every tab of that site shares it; settings live in chrome.storage.sync.
 (() => {
   const DURATIONS_MIN = [5, 10, 15];
-  const TIMELINE = '[data-testid="primaryColumn"] section[role="region"]';
 
+  // Keep in sync with DEFAULTS in popup.js.
+  const DEFAULTS = {
+    xFeed: true,
+    xNoAutoAdvance: false,
+    xLive: false,
+    ytHome: false,
+    ytShorts: false,
+    redditFeed: false,
+    fbFeed: false,
+  };
+
+  // feedSetting: the toggle that turns the timed feed lock on for this site.
+  // isFeedPage: paths where the feed lives. feed: the element to hide; the
+  // panel is inserted just before the first match. toggles: extra settings
+  // that are pure CSS (see blocky.css) and get an html class when on.
+  const SITES = [
+    {
+      id: "x",
+      host: /(^|\.)(x|twitter)\.com$/,
+      feedSetting: "xFeed",
+      // "/" and "/home" are the feed; "/compose/..." is the post modal drawn over it.
+      isFeedPage: (p) => /^\/(home\/?)?$|^\/compose\//.test(p),
+      feed: '[data-testid="primaryColumn"] section[role="region"]',
+      toggles: ["xLive", "xNoAutoAdvance"],
+    },
+    {
+      id: "youtube",
+      host: /(^|\.)youtube\.com$/,
+      feedSetting: "ytHome",
+      isFeedPage: (p) => p === "/",
+      // Desktop keeps other pages' ytd-browse in the DOM, so pin to "home".
+      feed: 'ytd-browse[page-subtype="home"] ytd-rich-grid-renderer, ytm-browse ytm-rich-grid-renderer',
+      toggles: ["ytShorts"],
+    },
+    {
+      id: "reddit",
+      host: /(^|\.)reddit\.com$/,
+      feedSetting: "redditFeed",
+      isFeedPage: (p) => /^\/((best|hot|new|top|rising)\/?)?$|^\/r\/(popular|all)(\/|$)/.test(p),
+      // shreddit-feed: new Reddit. #siteTable: old.reddit.com.
+      feed: "shreddit-feed, #siteTable",
+      toggles: [],
+    },
+    {
+      id: "facebook",
+      host: /(^|\.)facebook\.com$/,
+      feedSetting: "fbFeed",
+      isFeedPage: (p) => /^\/(home\.php)?$/.test(p),
+      feed: '[role="main"] [role="feed"]',
+      toggles: [],
+    },
+  ];
+
+  const site = SITES.find((s) => s.host.test(location.hostname));
+  if (!site) return;
+
+  const UNLOCK_KEY = `unlockUntil.${site.id}`;
+  const root = document.documentElement;
+  root.classList.add(`blocky-${site.id}`);
+
+  let settings = { ...DEFAULTS };
   let unlockUntil = 0;
   let wasLocked = true;
   let relockTimer = null;
   let tickTimer = null;
   let frame = null;
 
-  // "/" and "/home" are the feed; "/compose/..." is the post modal drawn over it.
-  const isFeedPage = () => /^\/(home\/?)?$|^\/compose\//.test(location.pathname);
+  const isFeedPage = () => site.isFeedPage(location.pathname);
   const isUnlocked = () => Date.now() < unlockUntil;
 
   function setUnlockUntil(ts) {
     try {
-      chrome.storage.local.set({ unlockUntil: ts });
+      chrome.storage.local.set({ [UNLOCK_KEY]: ts });
     } catch {
       // Extension was reloaded; this page's script is orphaned. Refresh fixes it.
     }
@@ -44,11 +105,11 @@
   }
 
   function ensurePanel() {
-    const timeline = document.querySelector(TIMELINE);
-    if (!timeline) return;
-    if (timeline.previousElementSibling?.id === "blocky-panel") return;
+    const feed = document.querySelector(site.feed);
+    if (!feed) return;
+    if (feed.previousElementSibling?.id === "blocky-panel") return;
     document.getElementById("blocky-panel")?.remove();
-    timeline.before(buildPanel());
+    feed.before(buildPanel());
   }
 
   function formatRemaining() {
@@ -76,12 +137,33 @@
     if (label.textContent !== text) label.textContent = text;
   }
 
+  // YouTube Shorts: /shorts/<id> plays the same video as /watch?v=<id>, but
+  // without the swipe-to-next-short player.
+  function redirectShorts() {
+    const m = location.pathname.match(/^\/shorts\/([\w-]+)/);
+    if (m) location.replace(`/watch?v=${m[1]}`);
+    return !!m;
+  }
+
+  // X's swipe-through video viewer (/<user>/status/<id>/mediaviewer) moves
+  // on to the next video when one ends. Looping means it never ends, so you
+  // only move on by swiping. Same approach as Control Panel for Twitter.
+  function loopViewerVideos() {
+    for (const v of document.querySelectorAll('[data-testid="vss-scroll-view"] video')) {
+      if (!v.loop) v.loop = true;
+    }
+  }
+
   function render() {
     frame = null;
-    const onFeed = isFeedPage();
+    for (const t of site.toggles) root.classList.toggle(`blocky-${t}`, settings[t]);
+    if (site.id === "youtube" && settings.ytShorts && redirectShorts()) return;
+    if (site.id === "x" && settings.xNoAutoAdvance) loopViewerVideos();
+
+    const onFeed = settings[site.feedSetting] && isFeedPage();
     const locked = onFeed && !isUnlocked();
 
-    document.documentElement.classList.toggle("blocky-locked", locked);
+    root.classList.toggle("blocky-locked", locked);
     if (locked) {
       ensurePanel();
       // Time ran out mid-scroll: jump back to the top so the panel is in view.
@@ -131,24 +213,39 @@
   }
 
   // Lock synchronously at document_start so the feed never flashes on load;
-  // the stored expiry (read async) may then unlock it.
-  if (isFeedPage()) document.documentElement.classList.add("blocky-locked");
+  // the stored settings and expiry (read async) may then unlock it.
+  if (isFeedPage()) root.classList.add("blocky-locked");
 
-  chrome.storage.local.get("unlockUntil", (data) => {
-    unlockUntil = data.unlockUntil || 0;
+  let loaded = 0;
+  const onLoaded = () => {
+    if (++loaded < 2) return;
     wasLocked = !isUnlocked();
     armTimers();
+  };
+  chrome.storage.sync.get({ settings: DEFAULTS }, (data) => {
+    settings = { ...DEFAULTS, ...data.settings };
+    onLoaded();
+  });
+  chrome.storage.local.get(UNLOCK_KEY, (data) => {
+    unlockUntil = data[UNLOCK_KEY] || 0;
+    onLoaded();
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== "local" || !changes.unlockUntil) return;
-    unlockUntil = changes.unlockUntil.newValue || 0;
-    armTimers();
+    if (loaded < 2) return;
+    if (area === "sync" && changes.settings) {
+      settings = { ...DEFAULTS, ...changes.settings.newValue };
+      render();
+    }
+    if (area === "local" && changes[UNLOCK_KEY]) {
+      unlockUntil = changes[UNLOCK_KEY].newValue || 0;
+      armTimers();
+    }
   });
 
-  // X is a single-page app: re-check on every DOM change (throttled to one
-  // pass per frame) to catch client-side navigation and re-rendered timelines.
-  new MutationObserver(onMutations).observe(document.documentElement, {
+  // These sites are single-page apps: re-check on every DOM change (throttled
+  // to one pass per frame) to catch client-side navigation and re-rendered feeds.
+  new MutationObserver(onMutations).observe(root, {
     childList: true,
     subtree: true,
   });
