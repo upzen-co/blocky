@@ -1,0 +1,43 @@
+! Title: Blocky for Brave iOS
+! Description: Cosmetic filters for x.com, m.youtube.com, Reddit and Facebook in
+!   Brave on iPhone/iPad. They only apply to these sites opened in Brave, not to
+!   the X / YouTube / Reddit / Facebook apps. No timed reveal: things stay hidden.
+!   To pause a rule, prefix it with "!".
+
+! ---- X: Spaces / live ("Live" cards at the top of and inside the feed) ----
+x.com##[data-testid="cellInnerDiv"]:has(a[href*="/i/spaces/"])
+x.com##[data-testid="cellInnerDiv"]:has(a[href*="/i/broadcasts/"])
+! The swipeable "LIVE" pill strip at the top of the home feed (mobile site)
+x.com##[data-testid="ScrollSnap-SwipeableList"]:has(button[aria-label*="is hosting"])
+x.com##[data-testid="ScrollSnap-SwipeableList"]:has(button[aria-label^="Broadcast,"])
+x.com##[data-testid="ScrollSnap-SwipeableList"]:has(button[aria-label^="Space,"])
+x.com##[data-testid="placementTracking"]:has(button[aria-label*="is hosting"])
+x.com##[data-testid="placementTracking"]:has(button[aria-label^="Broadcast,"])
+x.com##[data-testid="placementTracking"]:has(button[aria-label^="Space,"])
+
+! ---- X: lock the swipe-through video viewer to the video you opened ----
+! Loop the video so it never auto-advances...
+x.com##+js(set-attr, [data-testid="vss-scroll-view"] video, loop, "")
+! ...and block swiping to other videos.
+x.com##[data-testid="vss-scroll-view"]:style(overflow: hidden !important; touch-action: none !important;)
+x.com##[data-testid="vss-scroll-view"] > div:style(overflow: hidden !important; touch-action: none !important;)
+
+! ---- YouTube Shorts (m.youtube.com) ----
+m.youtube.com##ytm-pivot-bar-item-renderer:has(.pivot-shorts)
+m.youtube.com##ytm-reel-shelf-renderer
+m.youtube.com##ytm-rich-section-renderer:has(ytm-shorts-lockup-view-model)
+m.youtube.com##grid-shelf-view-model:has(a[href^="/shorts/"])
+m.youtube.com##ytm-video-with-context-renderer:has(a[href^="/shorts/"])
+m.youtube.com##ytm-rich-item-renderer:has(a[href^="/shorts/"])
+
+! ---- YouTube home feed only (channel pages and search keep working) ----
+m.youtube.com##html:has(.pivot-w2w[aria-selected="true"]) ytm-browse ytm-rich-grid-renderer
+
+! ---- Reddit home / Popular feeds only (subreddits keep working) ----
+www.reddit.com##shreddit-app[routename="frontpage"] shreddit-feed
+www.reddit.com##shreddit-app[routename="popular"] shreddit-feed
+www.reddit.com##shreddit-app[routename="all"] shreddit-feed
+
+! ---- Facebook News Feed ----
+www.facebook.com##[role="main"] [role="feed"]
+m.facebook.com##[role="main"] [role="feed"]

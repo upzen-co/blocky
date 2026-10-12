@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Blocky settings</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 14px 16px;
+    min-width: 280px;
+    font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  h1 { margin: 0 0 4px; font-size: 16px; font-weight: 800; }
+  h2 { margin: 14px 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
+  label { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; }
+  input { accent-color: #4cae50; margin: 0; }
+  small { display: block; margin-top: 12px; opacity: 0.6; }
+</style>
+</head>
+<body>
+  <h1>Blocky</h1>
+  <h2>X</h2>
+  <label><input type="checkbox" id="xFeed"> Hide home feed (timed reveal)</label>
+  <label><input type="checkbox" id="xNoAutoAdvance"> Stop the video viewer moving to other videos</label>
+  <label><input type="checkbox" id="xLive"> Hide Spaces and live broadcasts</label>
+  <h2>YouTube</h2>
+  <label><input type="checkbox" id="ytHome"> Hide homepage feed (timed reveal)</label>
+  <label><input type="checkbox" id="ytShorts"> Hide Shorts, open them as normal videos</label>
+  <h2>Reddit</h2>
+  <label><input type="checkbox" id="redditFeed"> Hide home and Popular feeds (timed reveal)</label>
+  <h2>Facebook</h2>
+  <label><input type="checkbox" id="fbFeed"> Hide News Feed (timed reveal)</label>
+  <small>Changes apply to open tabs straight away.</small>
+  <script src="popup.js"></script>
+</body>
+</html>
