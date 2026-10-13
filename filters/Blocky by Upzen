@@ -38,6 +38,19 @@ www.reddit.com##shreddit-app[routename="frontpage"] shreddit-feed
 www.reddit.com##shreddit-app[routename="popular"] shreddit-feed
 www.reddit.com##shreddit-app[routename="all"] shreddit-feed
 
+! ---- Reddit "Get the app to keep using Reddit" wall (mobile web) ----
+! Adapted from uBlock Origin's annoyances-others list (GPLv3).
+! Mark the app nag as already shown today, and stop the timer that opens it.
+www.reddit.com##+js(trusted-set-local-storage-item, xpromo-consolidation, $currentDate$)
+www.reddit.com##+js(prevent-setTimeout, '{e(n,t,r)}', 30000)
+! If it still opens: hide it and give scrolling back.
+www.reddit.com###blocking-modal
+www.reddit.com##[id*="xpromo"]
+www.reddit.com##[bundlename*="xpromo"]
+www.reddit.com##div.prompt:has(slot[name="view-in-app-button"])
+www.reddit.com##body > div[style*="backdrop-filter"]
+www.reddit.com##body:style(overflow: auto !important; pointer-events: auto !important;)
+
 ! ---- Facebook News Feed ----
 www.facebook.com##[role="main"] [role="feed"]
 m.facebook.com##[role="main"] [role="feed"]
